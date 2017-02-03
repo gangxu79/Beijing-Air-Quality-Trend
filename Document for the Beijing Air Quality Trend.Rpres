@@ -1,0 +1,196 @@
+Document for the Beijing Air Quality Trend
+========================================================
+author: Gang Xu
+date: 02/02/2017
+autosize: true
+
+Introduction
+========================================================
+
+This is a document for shiny-based app generated in RStudio. There are two interactive graphs in the app. The first graph shows how many days in each calendar month were categorized into 6 different levels with PM2.5 values in the year between 2008 and 2016, which can be selected on the page. The second graph shows the air quality trend in the continuous years between 2008 and 2016 with 6 different air quality levels.
+
+- Fig 1: Distribution of days with differnt air quality level in specific year.
+- Fig 2: The percentage trend of days in current year for 6 air quality categories.
+
+Data Source
+========================================================
+
+The historical data can be download from <http://www.stateair.net/web/historical/1/1.html>. Part of the data were missed in the file and were ignored in the analysis. The content and definition of the data was described in the doc <http://www.stateair.net/web/assets/USDOS_AQDataFilesFactSheet.pdf>. Users of the U.S. Department of State air quality data files must abide by the data use conditions outlined in the Data Use Statement <http://www.stateair.net/web/assets/USDOS_AQDataUseStatement.pdf>.
+
+
+Data Manipulation
+========================================================
+
+The data has been manipulated according to the definition of AQI (Air Quality Index). Although the given data was PM2.5 value instead of AQI, we categorized PM2.5 into 6 levels for convenience. 
+
+```{r, echo=TRUE, eval=FALSE}
+beijing_air$Value[beijing_air$Value==-999] <- NA
+avg_air <- summarise(group_by(beijing_air, Year, Month, Day), avgValue = round(mean(Value, na.rm = TRUE)))
+avg_air$pollution <- cut(avg_air$avgValue, c(0,50, 100, 150, 200, 300, 1000))
+levels(avg_air$pollution) <- c("Excellent", "Good", "Lightly Polluted", "Moderately Polluted", "Heavily Polluted", "Severely Polluted")
+```
+
+Interactive Graph
+========================================================
+
+The interactive shiny app was built in RStudio. The year can be chosen to show stacked barplot with days in different air condition by month in the first graph. In the second graph, you can choose which air condition trend you want to see in the graph. As shown in the graph, we can tell the days with Excellent air quality was increasing in the last 9 years significantly. And the light polluted days were reduced in the long trend.
+
+```{r, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+
+beijing_2008 <- read.csv("Beijing_2008_HourlyPM2.5_created20140325.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_2009 <- read.csv("Beijing_2009_HourlyPM25_created20140709.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_2010 <- read.csv("Beijing_2010_HourlyPM25_created20140709.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_2011 <- read.csv("Beijing_2011_HourlyPM25_created20140709.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_2012 <- read.csv("Beijing_2012_HourlyPM2.5_created20140325.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_2013 <- read.csv("Beijing_2013_HourlyPM2.5_created20140325.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_2014 <- read.csv("Beijing_2014_HourlyPM25_created20150203.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_2015 <- read.csv("Beijing_2015_HourlyPM25_created20160201.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_2016 <- read.csv("Beijing_2016_HourlyPM25_created20170103.csv",
+                         header = TRUE,
+                         skip = 3,
+                         colClasses = c("character",
+                                        "character", 
+                                        "character", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "integer", 
+                                        "character", 
+                                        "character", 
+                                        "character"))
+beijing_air <- rbind(beijing_2008, 
+                     beijing_2009,
+                     beijing_2010,
+                     beijing_2011,
+                     beijing_2012,
+                     beijing_2013,
+                     beijing_2014,
+                     beijing_2015,
+                     beijing_2016)
+beijing_air$Value[beijing_air$Value==-999] <- NA
+avg_air <- summarise(group_by(beijing_air, Year, Month, Day), avgValue = round(mean(Value, na.rm = TRUE)))
+avg_air$pollution <- cut(avg_air$avgValue, c(0,50, 100, 150, 200, 300, 1000))
+levels(avg_air$pollution) <- c("Excellent",
+                               "Good",
+                               "Lightly Polluted",
+                               "Moderately Polluted",
+                               "Heavily Polluted",
+                               "Severely Polluted")
+pollcolor <- c("green", "yellow", "orange", "red", "maroon", "red4", "gray")
+# Distribution of days with different air quality for each year
+theyear <- 2016
+current <- subset(avg_air, Year == theyear)
+p <- ggplot() + geom_bar(aes(x = factor(Month), fill = pollution), 
+                         data = current)
+p <- p + ggtitle(paste("Distribution of days with different air quality in ", theyear))
+p <- p + xlab("Month") + ylab("Number of days")
+p <- p + scale_fill_manual(name = "Air quality", values = pollcolor)
+p
+```
